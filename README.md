@@ -7,6 +7,8 @@ Script that exports KANJIDIC files in other data formats.
 This is a complement app for [`kanjidic-reader`](https://github.com/Temoto-kun/kanjidic-reader) in which it parses KANJIDIC data, while `kanjidic-exporter` produces output from `kanjidic-reader` to formats such as JSON, XML, CSV,
 as well as import them to a database, SQL or NoSQL.
 
+You might want to check out [`kanjidic-database-importer`](https://github.com/Temoto-kun/kanjidic-database-importer) for importing parsed KANJIDIC data to a database.
+
 ## Contribution
 
 Sure thing! Just clone the repo.
