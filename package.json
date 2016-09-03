@@ -35,6 +35,8 @@
   },
   "dependencies": {
     "byline": "^5.0.0",
+    "js2xmlparser": "^1.0.0",
+    "jsonfile": "^2.3.1",
     "lodash.get": "^4.4.2",
     "lodash.has": "^4.5.2",
     "lodash.set": "^4.3.2",
