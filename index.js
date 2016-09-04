@@ -5,7 +5,9 @@
 
             return jsonfile.writeFile(
                 filename,
-                data.filter(datum => datum.type === 'entry'),
+                data
+                    .filter(datum => datum.type === 'entry')
+                    .map(entry => entry.data),
                 cb
             );
         },
@@ -17,13 +19,15 @@
             outputStream.on('close', cb);
 
             return outputStream
-                .write(js2xmlparser("entries", data.map(entry => entry.data), {
-                    arrayMap: {
-                        entries: "entry",
-                        meaning: "meaning",
-                        strokes: "count"
+                .write(js2xmlparser("entries", data
+                    .filter(datum => datum.type === 'entry')
+                    .map(entry => entry.data), {
+                        arrayMap: {
+                            entries: "entry",
+                            strokes: "count"
+                        }
                     }
-                }));
+                ));
         },
         createCsvFile = function createCsvFile(filename, data, cb) {
             var fs = require('fs'),
@@ -36,8 +40,8 @@
                     'mapping.shift_jis',
                     'reading.on',
                     'reading.kun',
-                    'reading.special.nanori',
-                    'reading.special.name_as_radical',
+                    'reading.nanori',
+                    'reading.name_as_radical',
                 ],
                 fields = nonPrefixFields.concat(Object.keys(prefixes).map(prefix => prefixes[prefix].attr));
 
@@ -65,12 +69,30 @@
                             return;
                         }
 
+                        if (field === 'index.i') {
+                            return [
+                                entry.index.i.radical.strokes,
+                                entry.index.i.radical.id,
+                                entry.index.i.remaining_strokes,
+                                '.',
+                                entry.index.i.order_in_sequence
+                            ].join('');
+                        }
+
                         if (field === 'index.mp') {
-                            return entry.index.mp.volume + '.' + entry.index.mp.page;
+                            return [
+                                entry.index.mp.volume,
+                                '.',
+                                entry.index.mp.page
+                            ].join('');
                         }
 
                         if (field === 'index.db') {
-                            return entry.index.db.volume + '.' + entry.index.db.chapter;
+                            return [
+                                entry.index.db.volume,
+                                '.',
+                                entry.index.db.chapter
+                            ].join('');
                         }
 
                         return get(entry, field);
@@ -95,14 +117,16 @@
 
             outputStream.write(fields.join(',') + '\n');
 
-            return data.forEach(entry => {
-                outputStream.write(createCsvEntry(entry.data) + '\n');
-            });
+            return data
+                .filter(datum => datum.type === 'entry')
+                .forEach(entry => {
+                    outputStream.write(createCsvEntry(entry.data) + '\n');
+                });
         };
 
     module.exports = {
         export: function kanjidicExporter(inputPath, outputPath) {
-            return function (format, cb) {
+            return function exporter(format, cb) {
                 return reader(inputPath, (data) => {
                     var fileWriters = {
                             json: createJsonFile,
